@@ -9,7 +9,7 @@ This project serves as a **base template** for developing microservices in Java 
 - CI/CD pipelines (Week 10)
 - And other functionalities as per the course plan
 
-**Note:** Example files are provided (`docker-compose.example.yml`, `Dockerfile.example`) as reference. Students should create their own implementations.
+**Note:** Students must implement Dockerfiles and complete `docker-compose.yml` as part of Week 2 (see course materials).
 
 ## Project Overview
 
@@ -343,17 +343,18 @@ mvn test -pl user-service,product-service,order-service,api-gateway
 
 ### Test Coverage
 
-The project includes comprehensive unit tests with high coverage:
+The project uses **JaCoCo** for coverage. Each module enforces a minimum line coverage (85% for services, 70% for API Gateway). After running `mvn test`, open the report at `target/site/jacoco/index.html` in each module.
 
-- **User Service**: 8+ test methods covering all CRUD operations (Service + Controller tests)
-- **Product Service**: 7+ test methods + Kafka event consumer tests (Service + Controller tests)
-- **Order Service**: 10+ test methods covering order creation, validation, and Kafka events (Service + Controller tests)
-- **API Gateway**: Application context tests
+- **User Service**: Controller tests (CRUD + validation + exception handler), Service tests (all branches including email-in-use), GlobalExceptionHandler, Application context
+- **Product Service**: Controller tests (CRUD + search + exception handler), Service tests (including null stockQuantity branches), OrderEventConsumer (success, product not found, insufficient stock, multiple items, save failure), GlobalExceptionHandler, Application context
+- **Order Service**: Controller tests (create, validation, get by id, exception handler), Service tests (create/get/update, user/product not found, insufficient stock), GlobalExceptionHandler, Order model (addOrderItem, calculateTotal), Application context
+- **API Gateway**: Application context (loads GatewayConfig)
 
 All tests use:
 - **JUnit 5** for test framework
 - **Mockito** for mocking dependencies
 - **Spring Boot Test** for integration tests
+- **JaCoCo** for coverage reports and minimum coverage checks
 - **MockMvc** for controller testing
 - **Spring Kafka Test** for Kafka integration testing
 
@@ -494,8 +495,7 @@ See **[API_EXAMPLES.md](API_EXAMPLES.md)** for practical API usage examples with
 2. **Database**: Currently uses H2 in-memory database. Should be replaced with AWS RDS in Week 7.
 3. **Docker (Week 2)**: 
    - **Students must create Dockerfiles** for each service (user-service, product-service, order-service, api-gateway)
-   - **Students must create docker-compose.yml** to orchestrate all services
-   - Example files provided: `Dockerfile.example`, `docker-compose.example.yml`
+   - **Students must complete docker-compose.yml** in the project root (TODO structure is provided)
    - See `Aulas/Week-02/` for detailed instructions
 4. **Tests**: Comprehensive unit tests are included (44+ test methods). All tests pass with Java 21.
 5. **CI/CD**: Pipelines must be created by students in Week 10.
@@ -557,11 +557,9 @@ Spring Boot Actuator is configured for health monitoring and observability:
 
 ## Running with Docker Compose
 
-**⚠️ IMPORTANT:** Students must create the `docker-compose.yml` file as part of Week 2 exercises.
+**⚠️ IMPORTANT:** Students must complete the `docker-compose.yml` file and create Dockerfiles for each service as part of Week 2 exercises.
 
-An example implementation is provided in `docker-compose.example.yml` for reference.
-
-Once you've created your `docker-compose.yml`:
+Once you've completed `docker-compose.yml` and built images from your Dockerfiles:
 
 ```bash
 # Start all services (Kafka, Zookeeper, and all microservices)

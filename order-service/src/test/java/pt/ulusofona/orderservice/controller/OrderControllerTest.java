@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,7 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @version 1.0.0
  * @since 1.0.0
  */
-@WebMvcTest(OrderController.class)
+@WebMvcTest(controllers = OrderController.class)
+@org.springframework.context.annotation.Import(GlobalExceptionHandler.class)
 class OrderControllerTest {
 
     @Autowired
@@ -83,6 +84,24 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testCreateOrder_WhenServiceThrows_ShouldReturn400WithMessage() throws Exception {
+        OrderItemRequest itemRequest = new OrderItemRequest(1L, 2);
+        OrderRequest orderRequest = new OrderRequest(1L, Arrays.asList(itemRequest));
+
+        when(orderService.createOrder(any(OrderRequest.class)))
+                .thenThrow(new RuntimeException("User not found with ID: 1"));
+
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("User not found with ID: 1"))
+                .andExpect(jsonPath("$.status").value("400"));
+
+        verify(orderService, times(1)).createOrder(any(OrderRequest.class));
     }
 
     @Test
@@ -170,6 +189,19 @@ class OrderControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.status").value("CONFIRMED"));
+    }
+
+    @Test
+    void testGetOrderById_WhenOrderNotFound_ShouldReturn400WithMessage() throws Exception {
+        when(orderService.getOrderById(999L))
+                .thenThrow(new RuntimeException("Order not found with ID: 999"));
+
+        mockMvc.perform(get("/orders/999"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Order not found with ID: 999"))
+                .andExpect(jsonPath("$.status").value("400"));
+
+        verify(orderService, times(1)).getOrderById(999L);
     }
 }
 

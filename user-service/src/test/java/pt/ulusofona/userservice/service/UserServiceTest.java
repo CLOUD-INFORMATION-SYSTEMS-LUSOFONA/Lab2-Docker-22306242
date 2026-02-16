@@ -164,6 +164,27 @@ class UserServiceTest {
     }
 
     @Test
+    void updateUser_WhenNewEmailAlreadyInUse_ShouldThrowException() {
+        // Arrange
+        UserRequest updateRequest = new UserRequest();
+        updateRequest.setName("João");
+        updateRequest.setEmail("outro@example.com");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.existsByEmail("outro@example.com")).thenReturn(true);
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            userService.updateUser(1L, updateRequest);
+        });
+
+        assertEquals("Email já está em uso: outro@example.com", exception.getMessage());
+        verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).existsByEmail("outro@example.com");
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
     void deleteUser_WhenUserExists_ShouldDeleteUser() {
         // Arrange
         when(userRepository.existsById(1L)).thenReturn(true);

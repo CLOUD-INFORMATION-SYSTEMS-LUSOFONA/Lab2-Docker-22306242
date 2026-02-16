@@ -22,7 +22,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ProductController.class)
+@WebMvcTest(controllers = ProductController.class)
+@org.springframework.context.annotation.Import(pt.ulusofona.productservice.controller.GlobalExceptionHandler.class)
 class ProductControllerTest {
 
     @Autowired
@@ -125,6 +126,45 @@ class ProductControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(productService, times(1)).deleteProduct(1L);
+    }
+
+    @Test
+    void getProductById_WhenProductNotFound_ShouldReturn400WithMessage() throws Exception {
+        when(productService.getProductById(999L))
+                .thenThrow(new RuntimeException("Produto não encontrado com ID: 999"));
+
+        mockMvc.perform(get("/products/999"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Produto não encontrado com ID: 999"))
+                .andExpect(jsonPath("$.status").value("400"));
+
+        verify(productService, times(1)).getProductById(999L);
+    }
+
+    @Test
+    void searchProducts_ShouldReturnMatchingProducts() throws Exception {
+        ProductResponse p1 = new ProductResponse(1L, "Notebook", "Desc", new BigDecimal("999.99"), 10, LocalDateTime.now(), LocalDateTime.now());
+        when(productService.searchProductsByName("note")).thenReturn(Arrays.asList(p1));
+
+        mockMvc.perform(get("/products/search").param("name", "note"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].name").value("Notebook"));
+
+        verify(productService, times(1)).searchProductsByName("note");
+    }
+
+    @Test
+    void deleteProduct_WhenProductNotFound_ShouldReturn400WithMessage() throws Exception {
+        doThrow(new RuntimeException("Produto não encontrado com ID: 999")).when(productService).deleteProduct(999L);
+
+        mockMvc.perform(delete("/products/999"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Produto não encontrado com ID: 999"))
+                .andExpect(jsonPath("$.status").value("400"));
+
+        verify(productService, times(1)).deleteProduct(999L);
     }
 }
 

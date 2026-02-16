@@ -147,5 +147,16 @@ class OrderEventConsumerTest {
         assertEquals(8, testProduct.getStockQuantity()); // 10 - 2 = 8
         assertEquals(4, product2.getStockQuantity()); // 5 - 1 = 4
     }
+
+    @Test
+    void testHandleOrderCreated_WhenSaveThrows_ShouldContinueWithoutRethrowing() {
+        when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
+        when(productRepository.save(any(Product.class))).thenThrow(new RuntimeException("DB error"));
+
+        assertDoesNotThrow(() -> orderEventConsumer.handleOrderCreated(orderCreatedEvent));
+
+        verify(productRepository, times(1)).findById(1L);
+        verify(productRepository, times(1)).save(any(Product.class));
+    }
 }
 

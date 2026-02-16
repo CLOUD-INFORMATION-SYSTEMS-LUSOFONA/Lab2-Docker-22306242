@@ -21,7 +21,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(UserController.class)
+@WebMvcTest(controllers = UserController.class)
+@org.springframework.context.annotation.Import(GlobalExceptionHandler.class)
 class UserControllerTest {
 
     @Autowired
@@ -123,6 +124,30 @@ class UserControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(userService, times(1)).deleteUser(1L);
+    }
+
+    @Test
+    void getUserById_WhenUserNotFound_ShouldReturn400WithMessage() throws Exception {
+        when(userService.getUserById(999L))
+                .thenThrow(new RuntimeException("Utilizador não encontrado com ID: 999"));
+
+        mockMvc.perform(get("/users/999"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Utilizador não encontrado com ID: 999"))
+                .andExpect(jsonPath("$.status").value("400"));
+
+        verify(userService, times(1)).getUserById(999L);
+    }
+
+    @Test
+    void createUser_WhenInvalidRequest_ShouldReturn400WithValidationErrors() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"\",\"email\":\"invalid\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("400"));
+
+        verify(userService, never()).createUser(any(UserRequest.class));
     }
 }
 
