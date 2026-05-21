@@ -1,0 +1,20 @@
+Mais simples:
+
+
+O resumo do pedido não tem as informações mais relevantes nem para o cliente, nem para o gestor - DONE
+
+Pinterest images para cada divisão - DONE
+
+Tem que haver verificação se a rua existe naquele distrito
+
+verificar se email existe em registar de empresa e de cliente
+
+PDF seja para o cliente final ou gestor empresa deve ter todas as informações que foram selecionadas no formulário e não do resumo do pedido
+
+Na página orçamentos do cliente, os valores que aparecem dos orçamentos são um bocadinho menos ou um bocadinho mais que o valor máximo do orçamento
+
+Na página orçamentos do cliente, quero poder ordenar por data
+
+Quando clico nos detalhes de um orçamento na página de orçamento do cliente, e depois volto para trás em vez de retornar para a página de orçamentos, vai para o dashboard
+
+Na página de orçamentos do gestor quero poder ordenar os orçamentos por data, preço máximo ou mínimo e filtrar por morada do imovel
