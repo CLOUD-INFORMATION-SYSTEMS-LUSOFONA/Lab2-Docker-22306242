@@ -22,7 +22,7 @@ module "network" {
   availability_zone_1 = "us-east-1a"
   availability_zone_2 = "us-east-1b"
 }
-
+# test PR trigger
 module "compute" {
   source = "./modules/ec2"
 
