@@ -1,3 +1,4 @@
+@"
 name: Deploy Production
 
 on:
@@ -20,10 +21,10 @@ jobs:
       - run: echo "Deploying to prod..."
 
       - name: Write summary
-	run: |
-	   echo "### Deploy Report" >> $GITHUB_STEP_SUMMARY
+        run: |
+          echo "### Deploy Report" >> $GITHUB_STEP_SUMMARY
           echo "- Service: product-service" >> $GITHUB_STEP_SUMMARY
-          echo "- SHA: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- SHA: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "- Time: $(date -u)" >> $GITHUB_STEP_SUMMARY
 
       - name: Notify Slack
@@ -36,3 +37,4 @@ jobs:
             {
               "text": "Deploy ${{ job.status }}: ${{ github.repository }}@${{ github.sha }}"
             }
+"@ | Set-Content .github\workflows\deploy-prod.yml
