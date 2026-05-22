@@ -1,4 +1,3 @@
-@"
 name: Deploy Production
 
 on:
@@ -37,4 +36,3 @@ jobs:
             {
               "text": "Deploy ${{ job.status }}: ${{ github.repository }}@${{ github.sha }}"
             }
-"@ | Set-Content .github\workflows\deploy-prod.yml
